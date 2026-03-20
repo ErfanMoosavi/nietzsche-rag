@@ -12,8 +12,6 @@ class Settings(BaseSettings):
     }
     license_info: dict[str, str] = {"name": "MIT"}
 
-    # Qdrant settings
-
     # OpenAI settings
 
     class Config:
