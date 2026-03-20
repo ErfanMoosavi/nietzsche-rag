@@ -3,7 +3,7 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     # App settings
-    app_name: str = "Nietzsche-Rag"
+    title: str = "Nietzsche-Rag"
     version: str = "0.1.0"
     description: str = "A rag system based on Nietzsche's philosophy!"
     contact: dict[str, str] = {
