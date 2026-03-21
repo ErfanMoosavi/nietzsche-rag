@@ -1,7 +1,7 @@
 [project]
 name = "nietzsche-rag"
 version = "0.1.0"
-description = "Add your description here"
+description = "A rag system based on Nietzsche's philosophy!"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
