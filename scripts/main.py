@@ -6,9 +6,24 @@ from sentence_transformers import SentenceTransformer
 
 COLLECTION_NAME = "nietzsche_rag"
 
+BOOKS = [
+    {
+        "filename": "thus_spoke_zarathustra.txt",
+        "book_name": "thus_spoke_zarathustra",
+    },
+    {
+        "filename": "genealogy_of_morals.txt",
+        "book_name": "genealogy_of_morals",
+    },
+    {
+        "filename": "twilight_of_the_idols.txt",
+        "book_name": "twilight_of_the_idols",
+    },
+]
+
 
 def create_collection(client: QdrantClient) -> None:
-    """Creates the Qdrant collection"""
+    """Creates the Qdrant collection if it doesn't exist"""
     if client.collection_exists(collection_name=COLLECTION_NAME):
         return
     else:
@@ -20,31 +35,32 @@ def create_collection(client: QdrantClient) -> None:
         )
 
 
-def read_book() -> str:
-    """Reads the book and returns the text as a string"""
-    data_path = Path(__file__).parent / "data" / "thus_spoke_zarathustra.txt"
-    with open(data_path, "r", encoding="utf-8") as f:
+def read_book(book_path: Path) -> str:
+    """Reads a book file and returns the text as a string"""
+    with open(book_path, "r", encoding="utf-8") as f:
         text = f.read()
     return text
 
 
 def chunk(text: str) -> list[str]:
     """Chunk the text using sentence chunking method"""
-    splitter = SentenceSplitter(chunk_size=128, chunk_overlap=30)
+    splitter = SentenceSplitter(chunk_size=256, chunk_overlap=40)
     return splitter.split_text(text=text)
 
 
-def embed(chunks: list[str]) -> list[models.PointStruct]:
-    """Embeds the chunks using sentence-transformers and returns the Qdrant PointStructs"""
+def embed(chunks: list[str], book_name: str) -> list[models.PointStruct]:
+    """Embeds the chunks and returns Qdrant PointStructs with book metadata"""
     print("Loading embedding model...")
     model = SentenceTransformer("all-MiniLM-L6-v2")
 
     points = []
     for i, chunk in enumerate(chunks):
         if i == 0:
-            print(f"Embedding chunk 0/{len(chunks)}")
+            print(f"Embedding chunk 0/{len(chunks)} for {book_name}")
         elif i % 50 == 0 or i == len(chunks) - 1:
-            print(f"Embedding chunk {i}/{len(chunks)} ({i / len(chunks) * 100:.1f}%)")
+            print(
+                f"Embedding chunk {i}/{len(chunks)} for {book_name} ({i / len(chunks) * 100:.1f}%)"
+            )
 
         embedding = model.encode(chunk).tolist()
 
@@ -52,7 +68,12 @@ def embed(chunks: list[str]) -> list[models.PointStruct]:
             models.PointStruct(
                 id=i,
                 vector=embedding,
-                payload={"text": chunk, "index": i, "chunk_size": len(chunk)},
+                payload={
+                    "text": chunk,
+                    "index": i,
+                    "chunk_size": len(chunk),
+                    "book": book_name,
+                },
             )
         )
     return points
@@ -64,23 +85,35 @@ def upsert(client: QdrantClient, points: list) -> None:
 
 
 def main() -> None:
-    """Main function"""
+    """Main function - indexes all books defined in BOOKS list"""
     client = QdrantClient(path="./qdrant_data")
     print("Connected to Qdrant")
 
     try:
         create_collection(client)
 
-        text = read_book()
-        print(f"Read book: {len(text)} characters")
+        for book in BOOKS:
+            print(f"\n{'=' * 50}")
+            print(f"Processing: {book['book_name']}")
+            print(f"{'=' * 50}")
 
-        chunks = chunk(text)
-        print(f"Created {len(chunks)} chunks")
+            data_path = Path(__file__).parent / "data" / book["filename"]
 
-        points = embed(chunks)
-        upsert(client, points)
-        print(f"Successfully indexed {len(points)} chunks to {COLLECTION_NAME}!")
+            text = read_book(data_path)
+            print(f"Read {len(text)} characters")
 
+            chunks = chunk(text)
+            print(f"Created {len(chunks)} chunks")
+
+            points = embed(chunks, book["book_name"])
+
+            upsert(client, points)
+            print(
+                f"Successfully indexed {len(points)} chunks from {book['book_name']}!"
+            )
+
+    except Exception:
+        raise
     finally:
         client.close()
 
