@@ -32,6 +32,7 @@ def create_collection(client: QdrantClient) -> None:
             vectors_config=models.VectorParams(
                 size=384, distance=models.Distance.COSINE
             ),
+            hnsw_config=models.HnswConfigDiff(m=32, ef_construct=300),
         )
 
 
@@ -42,9 +43,17 @@ def read_book(book_path: Path) -> str:
     return text
 
 
+def preprocess(text: str) -> str:
+    """Preprocesses the text before embedding"""
+    text = text.replace("\n", " ")
+    text = text.replace("\r", " ")
+    text = " ".join(text.split())
+    return text
+
+
 def chunk(text: str) -> list[str]:
     """Chunk the text using sentence chunking method"""
-    splitter = SentenceSplitter(chunk_size=256, chunk_overlap=40)
+    splitter = SentenceSplitter(chunk_size=180, chunk_overlap=40)
     return splitter.split_text(text=text)
 
 
@@ -100,6 +109,7 @@ def main() -> None:
             data_path = Path(__file__).parent / "data" / book["filename"]
 
             text = read_book(data_path)
+            text = preprocess(text)
             print(f"Read {len(text)} characters")
 
             chunks = chunk(text)
