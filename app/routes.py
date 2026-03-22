@@ -15,6 +15,7 @@ def retrieve(
     rag: Rag = Depends(get_rag),
 ) -> RetreiveRes:
     response = rag.retrieve(qdrant, req.text, req.limit)
+
     points: list[Point] = []
     for res in response:
         points.append(
@@ -24,4 +25,5 @@ def retrieve(
                 score=res.score,
             )
         )
+
     return RetreiveRes(points=points)
