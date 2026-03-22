@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from qdrant_client import QdrantClient
 
 from app.dependencies import get_qdrant, get_rag
@@ -14,16 +14,19 @@ def retrieve(
     qdrant: QdrantClient = Depends(get_qdrant),
     rag: Rag = Depends(get_rag),
 ) -> RetreiveRes:
-    response = rag.retrieve(qdrant, req.text, req.limit)
-
-    points: list[Point] = []
-    for res in response:
-        points.append(
-            Point(
-                text=res.payload["text"],
-                book_name=res.payload["book_name"],
-                score=res.score,
+    try:
+        response = rag.retrieve(qdrant, req.text, req.limit)
+        points: list[Point] = []
+        for res in response:
+            points.append(
+                Point(
+                    text=res.payload["text"],
+                    book_name=res.payload["book_name"],
+                    score=res.score,
+                )
             )
+        return RetreiveRes(points=points)
+    except Exception as e:
+        return HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
         )
-
-    return RetreiveRes(points=points)
