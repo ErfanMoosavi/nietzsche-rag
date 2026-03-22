@@ -15,7 +15,7 @@ def retrieve(
     rag: Rag = Depends(get_rag),
 ) -> RetreiveRes:
     try:
-        response = rag.retrieve(qdrant, req.text, req.limit)
+        response = rag.retrieve(qdrant, req.text, req.limit, req.book)
         points: list[Point] = []
         for res in response:
             points.append(
