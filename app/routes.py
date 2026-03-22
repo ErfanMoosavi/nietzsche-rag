@@ -2,13 +2,17 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from qdrant_client import QdrantClient
 
 from app.dependencies import get_qdrant, get_rag
-from app.schemas import RetrieveRes, RetrieveReq
+from app.schemas import RetrieveReq, RetrieveRes
 from app.services import Rag
 
 router = APIRouter(prefix="/rag", tags=["rag"])
 
 
-@router.post("/retrieval", response_model=RetrieveRes)
+@router.post(
+    "/retrieval",
+    response_model=RetrieveRes,
+    description="This route is only for retrieval task. User can retrieve related chunks using the query",
+)
 def retrieve(
     req: RetrieveReq,
     qdrant: QdrantClient = Depends(get_qdrant),
