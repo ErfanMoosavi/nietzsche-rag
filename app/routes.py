@@ -21,6 +21,7 @@ def retrieve(
     try:
         points = rag.retrieve(qdrant, req.text, req.limit, req.book, req.language)
         return RetrieveRes(points=points)
+
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
