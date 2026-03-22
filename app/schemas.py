@@ -4,11 +4,11 @@ from pydantic import BaseModel, Field
 
 
 class RetrieveReq(BaseModel):
-    text: str = Field(..., description="The input text (query)")
+    text: str = Field(..., example="Punishment", description="The input text (query)")
     limit: int | None = Field(
         default=5, gt=0, lt=20, description="Number of results to return"
     )
-    book_name: (
+    book: (
         Literal[
             "thus_spoke_zarathustra", "genealogy_of_morals", "twilight_of_the_idols"
         ]
@@ -21,7 +21,7 @@ class RetrieveReq(BaseModel):
 
 class Point(BaseModel):
     text: str
-    book_name: str
+    book: str
     score: float
 
 

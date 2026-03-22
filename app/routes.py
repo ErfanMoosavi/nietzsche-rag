@@ -21,7 +21,7 @@ def retrieve(
             points.append(
                 Point(
                     text=res.payload["text"],
-                    book_name=res.payload["book_name"],
+                    book=res.payload["book"],
                     score=res.score,
                 )
             )
