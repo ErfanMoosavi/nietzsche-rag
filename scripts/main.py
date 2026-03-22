@@ -1,8 +1,13 @@
+import asyncio
+import os
 from pathlib import Path
 
+from dotenv import load_dotenv
 from llama_index.core.node_parser import SentenceSplitter
+from openai import AsyncOpenAI
 from qdrant_client import QdrantClient, models
 from sentence_transformers import SentenceTransformer
+from texttools import BatchTheTool
 
 COLLECTION_NAME = "nietzsche_rag"
 
@@ -57,18 +62,38 @@ def chunk(text: str) -> list[str]:
     return splitter.split_text(text=text)
 
 
-def embed(chunks: list[str], book_name: str) -> list[models.PointStruct]:
+async def extract_keywords(chunks: list[str]) -> list[list[str]]:
+    """Extracts keywords using hamtaa-texttools"""
+    load_dotenv()
+    client = AsyncOpenAI(
+        base_url=os.getenv("BASE_URL"), api_key=os.getenv("OPENAI_API_KEY")
+    )
+    tool = BatchTheTool(client=client, model=os.getenv("MODEL"))
+    results = await tool.extract_keywords(
+        texts=chunks, mode="count", number_of_keywords=5, output_lang="English"
+    )
+    outputs = []
+    for res in results:
+        outputs.append(res.result)
+    return outputs
+
+
+def embed(
+    chunks: list[str], book_name: str, keywords: list[list[str]]
+) -> list[models.PointStruct]:
     """Embeds the chunks and returns Qdrant PointStructs with book metadata"""
     print("Loading embedding model...")
     model = SentenceTransformer("all-MiniLM-L6-v2")
 
     points = []
-    for i, chunk in enumerate(chunks):
+    total_chunks = len(chunks)
+
+    for i, (chunk, keyword_list) in enumerate(zip(chunks, keywords)):
         if i == 0:
-            print(f"Embedding chunk 0/{len(chunks)} for {book_name}")
-        elif i % 50 == 0 or i == len(chunks) - 1:
+            print(f"Embedding chunk 0/{total_chunks} for {book_name}")
+        elif i % 50 == 0 or i == total_chunks - 1:
             print(
-                f"Embedding chunk {i}/{len(chunks)} for {book_name} ({i / len(chunks) * 100:.1f}%)"
+                f"Embedding chunk {i}/{total_chunks} for {book_name} ({i / total_chunks * 100:.1f}%)"
             )
 
         embedding = model.encode(chunk).tolist()
@@ -82,6 +107,7 @@ def embed(chunks: list[str], book_name: str) -> list[models.PointStruct]:
                     "index": i,
                     "chunk_size": len(chunk),
                     "book": book_name,
+                    "keywords": keyword_list,
                 },
             )
         )
@@ -93,7 +119,7 @@ def upsert(client: QdrantClient, points: list) -> None:
     client.upsert(collection_name=COLLECTION_NAME, points=points)
 
 
-def main() -> None:
+async def main() -> None:
     """Main function - indexes all books defined in BOOKS list"""
     client = QdrantClient(path="./qdrant_data")
     print("Connected to Qdrant")
@@ -113,9 +139,10 @@ def main() -> None:
             print(f"Read {len(text)} characters")
 
             chunks = chunk(text)
+            keywords = await extract_keywords(chunks)
             print(f"Created {len(chunks)} chunks")
 
-            points = embed(chunks, book["book_name"])
+            points = embed(chunks, book["book_name"], keywords)
 
             upsert(client, points)
             print(
@@ -129,4 +156,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
