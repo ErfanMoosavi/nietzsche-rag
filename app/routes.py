@@ -5,7 +5,7 @@ from app.dependencies import get_qdrant, get_rag
 from app.schemas import Point, RetreiveRes, RetrieveReq
 from app.services import Rag
 
-router = APIRouter(prefix="rag", tags=["rag"])
+router = APIRouter(prefix="/rag", tags=["rag"])
 
 
 @router.post("/retrieval", response_model=RetreiveRes)
