@@ -12,6 +12,10 @@ class Settings(BaseSettings):
     }
     license_info: dict[str, str] = {"name": "MIT"}
 
+    # Qdrant settings
+    qdrant_path: str = "./qdrant_data"
+    collection_name: str = "nietzsche_rag"
+
     # OpenAI settings
 
     class Config:
