@@ -22,14 +22,3 @@ class RetrieveReq(BaseModel):
         example="Persian",
         description="The langauge of the retrieved texts",
     )
-
-
-class Point(BaseModel):
-    text: str
-    book: str
-    translation: str | None
-    score: float
-
-
-class RetreiveRes(BaseModel):
-    points: list[Point]
