@@ -17,8 +17,9 @@ class Settings(BaseSettings):
     collection_name: str = "nietzsche_rag"
 
     # OpenAI settings
-    # base_url: str
-    # api_key: str
+    openai_api_key: str
+    base_url: str
+    llm_model: str
 
     class Config:
         env_file = ".env"
