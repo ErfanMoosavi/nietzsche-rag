@@ -68,7 +68,7 @@ async def extract_keywords(chunks: list[str]) -> list[list[str]]:
     client = AsyncOpenAI(
         base_url=os.getenv("BASE_URL"), api_key=os.getenv("OPENAI_API_KEY")
     )
-    tool = BatchTheTool(client=client, model=os.getenv("MODEL"))
+    tool = BatchTheTool(client=client, model=os.getenv("MODEL"), max_concurrency=10)
     results = await tool.extract_keywords(
         texts=chunks, mode="count", number_of_keywords=5, output_lang="English"
     )
