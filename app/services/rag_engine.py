@@ -43,8 +43,8 @@ class Rag:
 
     def generate_response(
         self,
-        qdrant_client: QdrantClient,
         openai_client: OpenAI,
+        qdrant_client: QdrantClient,
         model: str,
         message: str,
         limit: int,
