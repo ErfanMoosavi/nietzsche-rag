@@ -16,9 +16,7 @@ def retrieve(
     rag: Rag = Depends(get_rag),
 ) -> RetrieveRes:
     try:
-        points = rag.retrieve(
-            qdrant_client, req.text, req.limit, req.book, req.language
-        )
+        points = rag.retrieve(qdrant_client, req.text, req.limit, req.book)
         return RetrieveRes(points=points)
 
     except Exception as e:
