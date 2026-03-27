@@ -17,3 +17,24 @@ class RetrieveReq(BaseModel):
         default=None,
         description="The book name to search, if None, no book filter will be applied",
     )
+
+
+class RagReq(BaseModel):
+    question: str = Field(
+        ..., example="Who is Dionysus?", description="The input question"
+    )
+    retrieval_limit: int = Field(
+        default=5,
+        gt=0,
+        lt=20,
+        description="Number of results to return for RAG pipeline",
+    )
+    based_on: (
+        Literal[
+            "thus_spoke_zarathustra", "genealogy_of_morals", "twilight_of_the_idols"
+        ]
+        | None
+    ) = Field(
+        default=None,
+        description="Restrict retrieval to a specific book.",
+    )

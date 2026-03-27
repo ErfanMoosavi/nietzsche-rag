@@ -1,4 +1,4 @@
-from .request import RetrieveReq
-from .response import Point, RetrieveRes
+from .request import RagReq, RetrieveReq
+from .response import Point, RagRes, RetrieveRes
 
-__all__ = ["RetrieveReq", "Point", "RetrieveRes"]
+__all__ = ["RagReq", "RetrieveReq", "Point", "RagRes", "RetrieveRes"]

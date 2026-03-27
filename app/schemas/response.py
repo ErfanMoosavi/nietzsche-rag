@@ -16,3 +16,7 @@ class Point(BaseModel):
 
 class RetrieveRes(BaseModel):
     points: list[Point] = Field(..., description="The retrieved points")
+
+
+class RagRes(BaseModel):
+    answer: str = Field(..., description="The answer of the question")
