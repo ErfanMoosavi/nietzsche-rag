@@ -1,25 +1,23 @@
 # Nietzsche RAG API
 
-## 📌 Overview
+## How to become who you ARE?🤔
+Use: **Nietzsche RAG API!**
 
-**Nietzsche RAG API** is a production-ready **Retrieval-Augmented Generation (RAG)** system built on Friedrich Nietzsche's philosophical works. It combines semantic search with vector embeddings to provide intelligent, context-aware answers from Nietzsche's writings.
+## What is that?
+It's a **RAG** system built on Nietzsche's philosophical works.
 
-The system indexes Nietzsche's major works including:
+If you want to know who you **ARE**, you should know that our system has these works of Nietzsche in its **RAG** system:
 - **Thus Spoke Zarathustra**
 - **The Genealogy of Morals**
 - **Twilight of the Idols**
 
-Each book is chunked, embedded using **Sentence Transformers**, and stored in **Qdrant** vector database for fast semantic search. The API provides endpoints for both retrieval-only queries and full RAG responses with LLM-generated answers.
+Each book is chunked, embedded, and stored in **Qdrant**. The API provides endpoints for both retrieval-only queries and full RAG responses with LLM-generated answers.
 
 ---
 
 ## ✨ Features
 
-- **Multi-Book Support** - Search across Nietzsche's complete works with book-level filtering
-- **Semantic Search** - Find relevant passages using cosine similarity on embeddings
-- **RAG Capabilities** - Combine retrieval with LLMs for contextual answers
-- **Fast & Scalable** - Built on Qdrant vector database
-- **Clean Architecture** - Separation of concerns with routes, services, and utilities
+Test it yourself! Please.
 
 ---
 
