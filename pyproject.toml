@@ -8,6 +8,7 @@ dependencies = [
     "fastapi[standard]==0.135.1",
     "hamtaa-texttools>=2.8.3",
     "llama-index-core>=0.14.18",
+    "openai>=2.30.0",
     "qdrant-client>=1.17.1",
     "sentence-transformers>=5.3.0",
 ]
