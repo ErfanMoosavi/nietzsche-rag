@@ -8,11 +8,7 @@ from app.services import Rag
 router = APIRouter(prefix="/rag", tags=["Rag"])
 
 
-@router.post(
-    "/retrieval",
-    response_model=RetrieveRes,
-    description="This route is only for retrieval task. User can retrieve related chunks using the query",
-)
+@router.post("/retrieval", response_model=RetrieveRes)
 def retrieve(
     req: RetrieveReq,
     qdrant: QdrantClient = Depends(get_qdrant),
