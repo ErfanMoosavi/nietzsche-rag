@@ -46,11 +46,11 @@ class Rag:
         openai_client: OpenAI,
         qdrant_client: QdrantClient,
         model: str,
-        message: str,
+        question: str,
         limit: int,
         book: str | None,
     ) -> str:
-        retrieved_points = self.retrieve(qdrant_client, message, limit, book)
+        retrieved_points = self.retrieve(qdrant_client, question, limit, book)
         formatted_points = format_points(retrieved_points)
         main_message = f"""
             You are a Nietzsche specialist.
@@ -58,7 +58,7 @@ class Rag:
             Here are the sources:
             {formatted_points}
             Here is the user's question:
-            {message}
+            {question}
             Based on the sources, answer user's question."""
         formatted_main_message = format_chat("user", main_message)
 
