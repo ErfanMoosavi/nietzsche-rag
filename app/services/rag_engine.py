@@ -1,8 +1,9 @@
+from openai import OpenAI
 from qdrant_client import QdrantClient, models
 
 from app.config import settings
 from app.schemas import Point
-from app.utils import embed
+from app.utils import embed, format_chat, format_points
 
 
 class Rag:
@@ -40,5 +41,28 @@ class Rag:
             )
         return points
 
-    def generate():
-        pass
+    def generate(
+        self,
+        qdrant_client: QdrantClient,
+        openai_client: OpenAI,
+        model: str,
+        message: str,
+        limit: int,
+        book: str | None,
+    ) -> str:
+        retrieved_points = self.retrieve(qdrant_client, message, limit, book)
+        formatted_points = format_points(retrieved_points)
+        main_message = f"""
+            You are a Nietzsche specialist.
+            Your goal is to answer user's questions based on the provided sources.
+            Here are the sources:
+            {formatted_points}
+            Here is the user's question:
+            {message}
+            Based on the sources, answer user's question."""
+        formatted_main_message = format_chat("user", main_message)
+
+        response = openai_client.chat.completions.create(
+            model=model, messages=formatted_main_message
+        )
+        return response
