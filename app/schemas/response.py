@@ -11,7 +11,6 @@ class Point(BaseModel):
         ...,
         description="The book name to search, if None, no book filter will be applied",
     )
-    translation: str | None = Field(..., description="The translation of the text")
     score: float = Field(..., description="The cosine similarity score")
 
 

@@ -17,8 +17,3 @@ class RetrieveReq(BaseModel):
         default=None,
         description="The book name to search, if None, no book filter will be applied",
     )
-    language: str | None = Field(
-        default=None,
-        example="Persian",
-        description="The langauge of the retrieved texts",
-    )

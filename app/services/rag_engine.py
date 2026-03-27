@@ -2,17 +2,12 @@ from qdrant_client import QdrantClient, models
 
 from app.config import settings
 from app.schemas import Point
-from app.utils import embed, translate
+from app.utils import embed
 
 
 class Rag:
     def retrieve(
-        self,
-        client: QdrantClient,
-        query: str,
-        limit: int,
-        book: str | None,
-        language: str | None,
+        self, qdrant_client: QdrantClient, query: str, limit: int, book: str | None
     ) -> list[Point]:
         embedding = embed(query)
         query_filter = None
@@ -26,7 +21,7 @@ class Rag:
                 ]
             )
 
-        results = client.query_points(
+        results = qdrant_client.query_points(
             collection_name=settings.collection_name,
             query=embedding,
             limit=limit,
@@ -36,15 +31,14 @@ class Rag:
 
         points: list[Point] = []
         for point in results.points:
-            translation = None
-            if language:
-                translation = translate(point.payload["text"], target_lang=language)
             points.append(
                 Point(
                     text=point.payload["text"],
                     book=point.payload["book"],
-                    translation=translation,
                     score=point.score,
                 )
             )
         return points
+
+    def generate():
+        pass
