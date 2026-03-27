@@ -52,13 +52,14 @@ class Rag:
         retrieved_points = self.retrieve(qdrant_client, question, limit, book)
         formatted_points = format_points(retrieved_points)
         main_message = f"""
-            You are a Nietzsche specialist.
-            Your goal is to answer user's questions based on the provided sources.
-            Here are the sources:
-            {formatted_points}
-            Here is the user's question:
-            {question}
-            Based on the sources, answer user's question."""
+        You are a Nietzsche specialist.
+        Your goal is to answer user's questions based on the provided sources.
+        Here are the sources:
+        {formatted_points}
+        Here is the user's question:
+        {question}
+        Based on the sources, answer user's question.
+        """
         formatted_main_message = format_chat("user", main_message)
 
         response = openai_client.chat.completions.create(
