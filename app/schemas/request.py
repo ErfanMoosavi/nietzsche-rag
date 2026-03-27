@@ -23,6 +23,7 @@ class RagReq(BaseModel):
     question: str = Field(
         ..., example="Who is Dionysus?", description="The input question"
     )
+    model: str = Field(..., description="The AI model used for generating response")
     retrieval_limit: int = Field(
         default=5,
         gt=0,
