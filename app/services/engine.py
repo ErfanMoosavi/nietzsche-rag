@@ -6,7 +6,7 @@ from app.schemas import Point
 from app.utils import embed, format_chat, format_points
 
 
-class Rag:
+class Engine:
     def retrieve(
         self, qdrant_client: QdrantClient, query: str, limit: int, book: str | None
     ) -> list[Point]:

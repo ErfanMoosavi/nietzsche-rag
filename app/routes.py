@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from openai import OpenAI
 from qdrant_client import QdrantClient
 
-from app.dependencies import get_openai, get_qdrant, get_rag
+from app.dependencies import get_engine, get_openai, get_qdrant
 from app.schemas import RagReq, RagRes, RetrieveReq, RetrieveRes
-from app.services import Rag
+from app.services import Engine
 
 router = APIRouter(prefix="/rag", tags=["Rag"])
 
@@ -13,10 +13,10 @@ router = APIRouter(prefix="/rag", tags=["Rag"])
 def retrieve(
     req: RetrieveReq,
     qdrant_client: QdrantClient = Depends(get_qdrant),
-    rag: Rag = Depends(get_rag),
+    engine: Engine = Depends(get_engine),
 ) -> RetrieveRes:
     try:
-        points = rag.retrieve(qdrant_client, req.text, req.limit, req.book)
+        points = engine.retrieve(qdrant_client, req.text, req.limit, req.book)
         return RetrieveRes(points=points)
 
     except Exception as e:
@@ -30,10 +30,10 @@ def ask_question(
     req: RagReq,
     openai_client: OpenAI = Depends(get_openai),
     qdrant_client: QdrantClient = Depends(get_qdrant),
-    rag: Rag = Depends(get_rag),
+    engine: Engine = Depends(get_engine),
 ) -> RagRes:
     try:
-        response = rag.generate_response(
+        response = engine.generate_response(
             openai_client,
             qdrant_client,
             req.question,
