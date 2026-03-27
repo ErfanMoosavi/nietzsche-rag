@@ -41,7 +41,7 @@ class Rag:
             )
         return points
 
-    def generate(
+    def generate_response(
         self,
         qdrant_client: QdrantClient,
         openai_client: OpenAI,
