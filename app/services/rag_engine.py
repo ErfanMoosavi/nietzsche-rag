@@ -45,7 +45,6 @@ class Rag:
         self,
         openai_client: OpenAI,
         qdrant_client: QdrantClient,
-        model: str,
         question: str,
         limit: int,
         book: str | None,
@@ -63,6 +62,6 @@ class Rag:
         formatted_main_message = format_chat("user", main_message)
 
         response = openai_client.chat.completions.create(
-            model=model, messages=formatted_main_message
+            model=settings.llm_model, messages=formatted_main_message
         )
         return response

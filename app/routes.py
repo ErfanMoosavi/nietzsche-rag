@@ -38,7 +38,6 @@ def ask_question(
         response = rag.generate_response(
             openai_client,
             qdrant_client,
-            req.model,
             req.question,
             limit=req.retrieval_limit,
             book=req.based_on,
