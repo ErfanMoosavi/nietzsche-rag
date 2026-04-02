@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     }
     license_info: dict[str, str] = {"name": "MIT"}
 
-    # Available books
+    # Books
     books: dict[str, dict[str, Any]] = {
         "thus_spoke_zarathustra": {
             "title": "Thus Spoke Zarathustra",
