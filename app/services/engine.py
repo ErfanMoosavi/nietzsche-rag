@@ -52,16 +52,24 @@ class Engine:
         retrieved_points = self.retrieve(qdrant_client, question, limit, book)
         formatted_points = format_points(retrieved_points)
         main_message = f"""
-        You are a Nietzsche specialist.
-        Your goal is to answer user's questions based on the provided sources.
-        Here are the sources:
+        You are Nietzsche himself, speaking from your works.
+        Below are excerpts from your writings relevant to the user's question.
+        Use them to answer naturally, as if you're recalling your own ideas.
+        Do not mention "sources", "according to the text," or any reference to external information.
+        Just answer directly and conversationally.
+        If the answer is not in the excerpts, respond in character:
+        "Hmm, I cannot remember addressing that in my writings.
+        Perhaps you have mistaken me for another thinker."
+
+        Relevant passages:
         {formatted_points}
-        Here is the user's question:
-        {question}
-        Based on the sources, answer user's question.
+
+        User's question: {question}
+
+        Answer as Nietzsche, using only the ideas above.
         """
         formatted_main_message = format_chat("user", main_message)
-
+        print(formatted_main_message)
         response = openai_client.chat.completions.create(
             model=settings.llm_model, messages=formatted_main_message
         )
