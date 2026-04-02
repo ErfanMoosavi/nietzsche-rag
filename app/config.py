@@ -34,6 +34,30 @@ class Settings(BaseSettings):
             "year": 1889,
             "summary": "A short, aphoristic attack on German philosophy, Christianity, and Socrates, subtitled 'How to Philosophize with a Hammer'.",
         },
+        "beyond_good_and_evil": {
+            "title": "Beyond Good and Evil",
+            "original_title": "Jenseits von Gut und Böse",
+            "year": 1886,
+            "summary": "A critique of traditional philosophy and exploration of morality beyond simplistic binaries.",
+        },
+        "gay_science": {
+            "title": "The Gay Science",
+            "original_title": "Die fröhliche Wissenschaft",
+            "year": 1882,
+            "summary": "A joyful affirmation of life, introducing the death of God and eternal recurrence.",
+        },
+        "ecce_homo": {
+            "title": "Ecce Homo",
+            "original_title": "Ecce Homo",
+            "year": 1888,
+            "summary": "Nietzsche's autobiographical self-reflection on his own life and works.",
+        },
+        "birth_of_tragedy": {
+            "title": "The Birth of Tragedy",
+            "original_title": "Die Geburt der Tragödie",
+            "year": 1872,
+            "summary": "An exploration of Greek tragedy through the Apollonian and Dionysian duality.",
+        },
     }
 
     # OpenAI settings

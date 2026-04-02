@@ -3,7 +3,13 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 BookName = Literal[
-    "thus_spoke_zarathustra", "genealogy_of_morals", "twilight_of_the_idols"
+    "thus_spoke_zarathustra",
+    "genealogy_of_morals",
+    "twilight_of_the_idols",
+    "beyond_good_and_evil",
+    "gay_science",
+    "ecce_homo",
+    "birth_of_tragedy",
 ]
 
 
