@@ -1,7 +1,7 @@
 from app.schemas import Point
 
 
-def format_chat(role: str, message: str) -> dict[str, str]:
+def format_chat(role: str, message: str) -> list[dict[str, str]]:
     return [{"role": role, "content": message}]
 
 
