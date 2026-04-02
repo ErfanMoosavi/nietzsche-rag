@@ -1,4 +1,4 @@
-from .chat_format import format_chat, format_points
 from .embed import embed
+from .format_chat import format_chat, format_points
 
-__all__ = ["format_chat", "format_points", "embed"]
+__all__ = ["embed", "format_chat", "format_points"]
