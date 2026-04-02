@@ -8,17 +8,18 @@ from app.utils import embed, format_chat, format_points
 
 class Engine:
     def retrieve(
-        self, qdrant_client: QdrantClient, query: str, limit: int, book: str | None
+        self, qdrant_client: QdrantClient, query: str, limit: int, books: list[str]
     ) -> list[Point]:
         embedding = embed(query)
         query_filter = None
 
-        if book:
+        if books:
             query_filter = models.Filter(
                 must=[
                     models.FieldCondition(
                         key="book", match=models.MatchValue(value=book)
                     )
+                    for book in books
                 ]
             )
 
