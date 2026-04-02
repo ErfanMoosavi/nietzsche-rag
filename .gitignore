@@ -208,3 +208,6 @@ __marimo__/
 
 # Embedding model
 all-MiniLM-L6-v2-local/
+
+# Qdrant data
+qdrant_data/
