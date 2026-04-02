@@ -1,13 +1,9 @@
-from typing import Literal
-
 from pydantic import BaseModel, Field
 
 
 class Point(BaseModel):
     text: str = Field(..., description="The input text")
-    book: Literal[
-        "thus_spoke_zarathustra", "genealogy_of_morals", "twilight_of_the_idols"
-    ] = Field(
+    book: str = Field(
         ...,
         description="The book name to search, if None, no book filter will be applied",
     )
