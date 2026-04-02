@@ -91,11 +91,6 @@ def embed(chunks: list[str], book_name: str) -> list[models.PointStruct]:
     return points
 
 
-def upsert(client: QdrantClient, points: list) -> None:
-    """Upserts points to the Qdrant collection"""
-    client.upsert(collection_name=COLLECTION_NAME, points=points)
-
-
 async def main() -> None:
     """Main function - indexes all books defined in BOOKS list"""
     client = QdrantClient(path="./qdrant_data")
@@ -120,7 +115,7 @@ async def main() -> None:
 
             points = embed(chunks, book["book_name"])
 
-            upsert(client, points)
+            client.upsert(collection_name=COLLECTION_NAME, points=points)
             print(
                 f"Successfully indexed {len(points)} chunks from {book['book_name']}!"
             )
