@@ -58,19 +58,19 @@ class Engine:
         Use them to answer naturally, as if you're recalling your own ideas.
         Do not mention "sources", "according to the text," or any reference to external information.
         Just answer directly and conversationally.
-        If the answer is not in the excerpts, respond in character:
-        "Hmm, I cannot remember addressing that in my writings.
-        Perhaps you have mistaken me for another thinker."
+        If the answer is not directly in the relevant passages, exactly respond (nothing else):
+        "Hmm, I cannot remember addressing that in my writings"
 
         Relevant passages:
         {formatted_points}
 
-        User's question: {question}
+        User's question:
+        {question}
 
         Answer as Nietzsche, using only the ideas above.
         """
         formatted_main_message = format_chat("user", main_message)
-        print(formatted_main_message)
+
         response = openai_client.chat.completions.create(
             model=settings.llm_model, messages=formatted_main_message
         )
