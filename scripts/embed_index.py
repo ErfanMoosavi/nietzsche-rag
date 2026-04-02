@@ -83,7 +83,7 @@ def embed(
 ) -> list[models.PointStruct]:
     """Embeds the chunks and returns Qdrant PointStructs with book metadata"""
     print("Loading embedding model...")
-    model = SentenceTransformer("all-MiniLM-L6-v2")
+    model = SentenceTransformer("all-MiniLM-L6-v2", local_files_only=True)
 
     points = []
     total_chunks = len(chunks)
