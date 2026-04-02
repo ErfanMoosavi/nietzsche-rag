@@ -20,6 +20,22 @@ BOOKS = [
         "filename": "twilight_of_the_idols.txt",
         "book_name": "twilight_of_the_idols",
     },
+    {
+        "filename": "beyond_good_and_evil.txt",
+        "book_name": "beyond_good_and_evil",
+    },
+    {
+        "filename": "gay_science.txt",
+        "book_name": "gay_science",
+    },
+    {
+        "filename": "ecce_homo.txt",
+        "book_name": "ecce_homo",
+    },
+    {
+        "filename": "birth_of_tragedy.txt",
+        "book_name": "birth_of_tragedy",
+    },
 ]
 
 
