@@ -27,4 +27,8 @@ class BooksRes(BaseModel):
 
 
 class BookInfoRes(BaseModel):
-    pass
+    title: str = Field(..., description="Full title in English")
+    original_title: str = Field(..., description="German title")
+    year: int = Field(..., description="Publication year")
+    chunk_count: int = Field(..., description="Number of chunks in Qdrant")
+    summary: str = Field(..., description="One-sentence description")

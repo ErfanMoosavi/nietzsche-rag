@@ -1,3 +1,5 @@
+from typing import Any
+
 from pydantic_settings import BaseSettings
 
 
@@ -13,11 +15,26 @@ class Settings(BaseSettings):
     license_info: dict[str, str] = {"name": "MIT"}
 
     # Available books
-    books: list[str] = [
-        "thus_spoke_zarathustra",
-        "genealogy_of_morals",
-        "twilight_of_the_idols",
-    ]
+    books: dict[str, dict[str, Any]] = {
+        "thus_spoke_zarathustra": {
+            "title": "Thus Spoke Zarathustra",
+            "original_title": "Also sprach Zarathustra",
+            "year": 1885,
+            "summary": "A philosophical novel where Zarathustra proclaims the Übermensch, the death of God, and eternal recurrence.",
+        },
+        "genealogy_of_morals": {
+            "title": "On the Genealogy of Morals",
+            "original_title": "Zur Genealogie der Moral",
+            "year": 1887,
+            "summary": "A polemical work tracing the origin of moral concepts like guilt, bad conscience, and ascetic ideals.",
+        },
+        "twilight_of_the_idols": {
+            "title": "Twilight of the Idols",
+            "original_title": "Götzen-Dämmerung",
+            "year": 1889,
+            "summary": "A short, aphoristic attack on German philosophy, Christianity, and Socrates, subtitled 'How to Philosophize with a Hammer'.",
+        },
+    }
 
     # OpenAI settings
     openai_api_key: str
