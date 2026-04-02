@@ -12,6 +12,13 @@ class Settings(BaseSettings):
     }
     license_info: dict[str, str] = {"name": "MIT"}
 
+    # Available books
+    books: list[str] = [
+        "thus_spoke_zarathustra",
+        "genealogy_of_morals",
+        "twilight_of_the_idols",
+    ]
+
     # OpenAI settings
     openai_api_key: str
     base_url: str

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
 from app.config import settings
-from app.routes import router
+from app.routes import books_router, rag_router
 
 app = FastAPI(
     title=settings.title,
@@ -11,4 +11,5 @@ app = FastAPI(
     license_info=settings.license_info,
 )
 
-app.include_router(router)
+app.include_router(books_router)
+app.include_router(rag_router)
