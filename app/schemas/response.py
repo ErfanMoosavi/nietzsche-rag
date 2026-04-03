@@ -18,7 +18,7 @@ class RagRes(BaseModel):
     answer: str = Field(..., description="The answer of the question")
 
 
-class BooksRes(BaseModel):
+class BooksListRes(BaseModel):
     books: list[str] = Field(..., description="List of available books")
 
 

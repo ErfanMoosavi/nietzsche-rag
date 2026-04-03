@@ -1,11 +1,11 @@
 from .request import RagReq, RetrieveReq
-from .response import BookInfoRes, BooksRes, Point, RagRes, RetrieveRes
+from .response import BookInfoRes, BooksListRes, Point, RagRes, RetrieveRes
 
 __all__ = [
     "RagReq",
     "RetrieveReq",
     "BookInfoRes",
-    "BooksRes",
+    "BooksListRes",
     "Point",
     "RagRes",
     "RetrieveRes",

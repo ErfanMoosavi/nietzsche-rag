@@ -3,16 +3,16 @@ from qdrant_client import QdrantClient
 
 from app.config import settings
 from app.dependencies import get_qdrant
-from app.schemas import BookInfoRes, BooksRes
+from app.schemas import BookInfoRes, BooksListRes
 from app.utils import count_chunks
 
 router = APIRouter(prefix="/books", tags=["Books"])
 
 
-@router.get("/", response_model=BooksRes)
-def list_books() -> BooksRes:
+@router.get("/", response_model=BooksListRes)
+def list_books() -> BooksListRes:
     try:
-        return BooksRes(books=settings.books.keys())
+        return BooksListRes(books=settings.books.keys())
 
     except Exception as e:
         raise HTTPException(
