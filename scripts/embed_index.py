@@ -5,51 +5,22 @@ from llama_index.core.node_parser import SentenceSplitter
 from qdrant_client import QdrantClient, models
 from sentence_transformers import SentenceTransformer
 
-COLLECTION_NAME = "nietzsche_rag"
-
-BOOKS = [
-    {
-        "filename": "thus_spoke_zarathustra.txt",
-        "book_name": "thus_spoke_zarathustra",
-    },
-    {
-        "filename": "genealogy_of_morals.txt",
-        "book_name": "genealogy_of_morals",
-    },
-    {
-        "filename": "twilight_of_the_idols.txt",
-        "book_name": "twilight_of_the_idols",
-    },
-    {
-        "filename": "beyond_good_and_evil.txt",
-        "book_name": "beyond_good_and_evil",
-    },
-    {
-        "filename": "gay_science.txt",
-        "book_name": "gay_science",
-    },
-    {
-        "filename": "ecce_homo.txt",
-        "book_name": "ecce_homo",
-    },
-    {
-        "filename": "birth_of_tragedy.txt",
-        "book_name": "birth_of_tragedy",
-    },
-]
+from .config import config
 
 
 def create_collection(client: QdrantClient) -> None:
     """Creates the Qdrant collection if it doesn't exist"""
-    if client.collection_exists(collection_name=COLLECTION_NAME):
+    if client.collection_exists(collection_name=config.COLLECTION_NAME):
         return
     else:
         client.create_collection(
-            collection_name=COLLECTION_NAME,
+            collection_name=config.COLLECTION_NAME,
             vectors_config=models.VectorParams(
-                size=384, distance=models.Distance.COSINE
+                size=config.VECTOR_SIZE, distance=models.Distance.COSINE
             ),
-            hnsw_config=models.HnswConfigDiff(m=32, ef_construct=300),
+            hnsw_config=models.HnswConfigDiff(
+                m=config.HNSW_M, ef_construct=config.HNSW_EF_CONSTRUCT
+            ),
         )
 
 
@@ -70,7 +41,9 @@ def preprocess(text: str) -> str:
 
 def chunk(text: str) -> list[str]:
     """Chunk the text using sentence chunking method"""
-    splitter = SentenceSplitter(chunk_size=160, chunk_overlap=40)
+    splitter = SentenceSplitter(
+        chunk_size=config.CHUNK_SIZE, chunk_overlap=config.CHUNK_OVERLAP
+    )
     return splitter.split_text(text=text)
 
 
@@ -115,12 +88,13 @@ async def main() -> None:
     try:
         create_collection(client)
 
-        for book in BOOKS:
+        for book in config.BOOKS:
             print(f"\n{'=' * 50}")
-            print(f"Processing: {book['book_name']}")
+            print(f"Processing: {book}")
             print(f"{'=' * 50}")
 
-            data_path = Path(__file__).parent / "data" / book["filename"]
+            book_file = book + ".txt"
+            data_path = Path(__file__).parent / "data" / book_file
 
             text = read_book(data_path)
             text = preprocess(text)
@@ -129,12 +103,10 @@ async def main() -> None:
             chunks = chunk(text)
             print(f"Created {len(chunks)} chunks")
 
-            points = embed(chunks, book["book_name"])
+            points = embed(chunks, book)
 
-            client.upsert(collection_name=COLLECTION_NAME, points=points)
-            print(
-                f"Successfully indexed {len(points)} chunks from {book['book_name']}!"
-            )
+            client.upsert(collection_name=config.COLLECTION_NAME, points=points)
+            print(f"Successfully indexed {len(points)} chunks from {book}!")
 
     except Exception:
         raise
