@@ -11,5 +11,11 @@ app = FastAPI(
     license_info=settings.license_info,
 )
 
+
+@app.get("/")
+def home() -> dict[str, str]:
+    return {"message": "Welcome to Nietzsche-Rag!"}
+
+
 app.include_router(books_router)
 app.include_router(rag_router)
