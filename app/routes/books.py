@@ -25,14 +25,7 @@ def book_info(
     book_name: str, qdrant_client: QdrantClient = Depends(get_qdrant)
 ) -> BookInfoRes:
     try:
-        if book_name not in settings.books:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Book '{book_name}' not found. Available: {list(settings.books.keys())}",
-            )
-
         book_data = settings.books[book_name]
-
         return BookInfoRes(
             title=book_data["title"],
             original_title=book_data["original_title"],
@@ -41,8 +34,6 @@ def book_info(
             summary=book_data["summary"],
         )
 
-    except HTTPException:
-        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
