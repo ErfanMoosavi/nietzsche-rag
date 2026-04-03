@@ -70,7 +70,7 @@ def preprocess(text: str) -> str:
 
 def chunk(text: str) -> list[str]:
     """Chunk the text using sentence chunking method"""
-    splitter = SentenceSplitter(chunk_size=180, chunk_overlap=40)
+    splitter = SentenceSplitter(chunk_size=160, chunk_overlap=40)
     return splitter.split_text(text=text)
 
 
