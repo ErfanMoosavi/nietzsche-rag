@@ -13,8 +13,8 @@ class Config:
 
     VECTOR_SIZE = 384
 
-    HNSW_M = 32
-    HNSW_EF_CONSTRUCT = 300
+    HNSW_M = 64
+    HNSW_EF_CONSTRUCT = 500
 
     CHUNK_SIZE = 160
     CHUNK_OVERLAP = 40
