@@ -76,8 +76,8 @@ def _save_model() -> None:
 
 
 def _embed(
-    model: SentenceTransformer, chunks: list[str], book_name: str
-) -> list[models.PointStruct]:
+    model: SentenceTransformer, chunks: list[str], book_name: str, start_id: int
+) -> tuple[list[models.PointStruct], int]:
     """Embeds the chunks and returns Qdrant PointStructs with book metadata"""
     print("Loading embedding model...")
 
@@ -85,6 +85,8 @@ def _embed(
     total_chunks = len(chunks)
 
     for i, chunk in enumerate(chunks):
+        point_id = start_id + i
+
         if i == 0:
             print(f"Embedding chunk 0/{total_chunks} for {book_name}")
         elif i % 50 == 0 or i == total_chunks - 1:
@@ -96,7 +98,7 @@ def _embed(
 
         points.append(
             models.PointStruct(
-                id=i,
+                id=point_id,
                 vector={
                     "dense": embedding,
                 },
@@ -108,7 +110,7 @@ def _embed(
                 },
             )
         )
-    return points
+    return points, start_id + len(chunks)
 
 
 def _upsert_points(
@@ -143,6 +145,7 @@ def setup() -> None:
         model = SentenceTransformer("all-MiniLM-L6-v2", local_files_only=True)
 
         # Process each book
+        next_id = 0
         for book in settings.books.keys():
             print(f"Processing: {book}")
 
@@ -156,6 +159,6 @@ def setup() -> None:
             chunks = _chunk(preprocessed_text)
             print(f"Created {len(chunks)} chunks")
 
-            points = _embed(model, chunks, book)
+            points, next_id = _embed(model, chunks, book, next_id)
             _upsert_points(qdrant_client, points)
             print(f"Successfully indexed {len(points)} chunks from {book}!")
