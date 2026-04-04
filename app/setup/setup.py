@@ -4,17 +4,20 @@ from llama_index.core.node_parser import SentenceSplitter
 from qdrant_client import QdrantClient, models
 from sentence_transformers import SentenceTransformer
 
-from .config import setup_config
+from app.dependencies import get_qdrant
+from app.setup.config import setup_config
 
 
-def _check_setup() -> bool:
-    """Cheks wether the set up has been done or not"""
-    is_setup = False
-    if Path.exists(Path(__file__).parent / "all-MiniLM-L6-v2-local") and Path(
-        __file__
-    ).exists(Path.parent / "qdrant_data"):
-        is_setup = True
-    return is_setup
+def _is_model_present() -> bool:
+    return (Path(__file__).parent / "all-MiniLM-L6-v2-local").exists()
+
+
+def _is_collection_populated(qdrant_client: QdrantClient) -> bool:
+    try:
+        count = qdrant_client.count(collection_name=setup_config.COLLECTION_NAME)
+        return count.count > 0
+    except Exception:
+        return False
 
 
 def _create_collection(qdrant_client: QdrantClient) -> None:
@@ -115,53 +118,49 @@ def _upsert_points(
 
 
 def setup() -> None:
-    """Sets up the app"""
-    if not _check_setup():
-        # Connect to Qdrant
-        qdrant_client = QdrantClient(path="./qdrant_data")
-        print("Connected to Qdrant")
+    # Connect to Qdrant (local file mode)
+    qdrant_client = get_qdrant()
+    print("Connected to Qdrant")
 
-        try:
-            # Create collection
-            _create_collection(qdrant_client)
+    try:
+        # Ensure collection and index exist (idempotent)
+        _create_collection(qdrant_client)
+        _create_payload_index(qdrant_client)
 
-            # Create payload index
-            _create_payload_index(qdrant_client)
+        # Check if data already exists
+        if _is_collection_populated(qdrant_client):
+            print("Collection already contains points. Skipping indexing.")
+        else:
+            print("Collection empty. Starting indexing...")
 
-            # Save the model
-            _save_model()
+            # Save model only if missing
+            if not _is_model_present():
+                _save_model()
+            else:
+                print("Model already saved locally. Skipping download.")
 
-            # Load the model
+            # Load model
             model = SentenceTransformer("all-MiniLM-L6-v2", local_files_only=True)
 
+            # Process each book
             for book in setup_config.BOOKS:
                 print(f"Processing: {book}")
 
                 book_file = book + ".txt"
                 data_path = Path(__file__).parent / "data" / book_file
 
-                # Read the book
                 text = _read_book(data_path)
                 print(f"Read {len(text)} characters")
 
-                # Preprocess the book
                 preprocessed_text = _preprocess(text)
-
-                # Chunk
                 chunks = _chunk(preprocessed_text)
                 print(f"Created {len(chunks)} chunks")
 
-                # Embed
                 points = _embed(model, chunks, book)
-
-                # Upsert points
                 _upsert_points(qdrant_client, points)
                 print(f"Successfully indexed {len(points)} chunks from {book}!")
 
-        except Exception:
-            raise
-        finally:
-            qdrant_client.close()
-
-    else:
-        print("Already set up!")
+    except Exception:
+        raise
+    finally:
+        qdrant_client.close()
