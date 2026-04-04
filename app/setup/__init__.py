@@ -1,3 +1,3 @@
-from .setup import Setup
+from .setup import setup
 
-__all__ = ["Setup"]
+__all__ = ["setup"]
