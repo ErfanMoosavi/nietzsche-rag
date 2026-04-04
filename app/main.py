@@ -12,7 +12,7 @@ app = FastAPI(
 )
 
 
-@app.get("/")
+@app.get("/", response_model=dict[str, str])
 def home() -> dict[str, str]:
     return {"message": "Welcome to Nietzsche-Rag!"}
 
