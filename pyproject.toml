@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi[standard]==0.135.1",
+    "fastembed>=0.8.0",
     "llama-index-core>=0.14.18",
     "openai>=2.30.0",
     "qdrant-client>=1.17.1",
