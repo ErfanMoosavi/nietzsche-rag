@@ -25,6 +25,13 @@ def create_collection(qdrant_client: QdrantClient) -> None:
         )
 
 
+def create_payload_index(qdrant_client: QdrantClient) -> None:
+    """Indexed the payload for more efficient search"""
+    qdrant_client.create_payload_index(
+        collection_name=config.COLLECTION_NAME, field_name="book"
+    )
+
+
 def read_book(book_path: Path) -> str:
     """Reads a book file and returns the text as a string"""
     with open(book_path, "r", encoding="utf-8") as f:
@@ -48,10 +55,11 @@ def chunk(text: str) -> list[str]:
     return splitter.split_text(text=text)
 
 
-def embed(chunks: list[str], book_name: str) -> list[models.PointStruct]:
+def embed(
+    model: SentenceTransformer, chunks: list[str], book_name: str
+) -> list[models.PointStruct]:
     """Embeds the chunks and returns Qdrant PointStructs with book metadata"""
     print("Loading embedding model...")
-    model = SentenceTransformer("all-MiniLM-L6-v2", local_files_only=True)
 
     points = []
     total_chunks = len(chunks)
@@ -90,30 +98,42 @@ def upsert_points(
     qdrant_client.upsert(collection_name=config.COLLECTION_NAME, points=points)
 
 
-def main() -> None:
+def run_etl() -> None:
     """Orchestrates the functionalities"""
     qdrant_client = QdrantClient(path="./qdrant_data")
     print("Connected to Qdrant")
 
     try:
+        # Create collection
         create_collection(qdrant_client)
 
+        # Create payload index
+        create_payload_index(qdrant_client)
+
+        # Load the model
+        model = SentenceTransformer("all-MiniLM-L6-v2", local_files_only=True)
+
         for book in config.BOOKS:
-            print(f"\n{'=' * 50}")
             print(f"Processing: {book}")
-            print(f"{'=' * 50}")
 
             book_file = book + ".txt"
             data_path = Path(__file__).parent / "data" / book_file
 
+            # Read the book
             text = read_book(data_path)
-            text = preprocess(text)
             print(f"Read {len(text)} characters")
 
-            chunks = chunk(text)
+            # Preprocess the book
+            preprocessed_text = preprocess(text)
+
+            # Chunk
+            chunks = chunk(preprocessed_text)
             print(f"Created {len(chunks)} chunks")
 
-            points = embed(chunks, book)
+            # Embed
+            points = embed(model, chunks, book)
+
+            # Upsert points
             upsert_points(qdrant_client, points)
             print(f"Successfully indexed {len(points)} chunks from {book}!")
 
@@ -124,4 +144,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    run_etl()

@@ -16,8 +16,8 @@ class Config:
     HNSW_M = 64
     HNSW_EF_CONSTRUCT = 500
 
-    CHUNK_SIZE = 160
-    CHUNK_OVERLAP = 40
+    CHUNK_SIZE = 150
+    CHUNK_OVERLAP = 35
 
 
 config = Config()

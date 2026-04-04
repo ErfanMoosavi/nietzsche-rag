@@ -19,6 +19,16 @@ Each book is chunked, embedded, and stored in **Qdrant**. The API provides endpo
 
 ---
 
+## How to run?
+1- Go to `scripts` directory
+
+2- Run `main()` function from main.py.
+
+**What it does?**
+It downloads the embedding model, embeds Nietzsche's books which are located in data directory and stores them in `Qdrant`. After that, everything is ready for running the app!
+
+---
+
 ## ✨ Features
 
 Test it yourself! Please.
