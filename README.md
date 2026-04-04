@@ -1,5 +1,9 @@
 # Nietzsche RAG API
 
+<p align="center">
+  <img src="assets/nietzsche.jpg" alt="Nietzsche">
+</p>
+
 ## How to become who you ARE?🤔
 Use: **Nietzsche RAG API!**
 
