@@ -4,7 +4,7 @@ from llama_index.core.node_parser import SentenceSplitter
 from qdrant_client import QdrantClient, models
 from sentence_transformers import SentenceTransformer
 
-from .setup_config import setup_config
+from .config import setup_config
 
 
 class Setup:
