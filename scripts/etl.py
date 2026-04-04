@@ -1,4 +1,3 @@
-import asyncio
 from pathlib import Path
 
 from llama_index.core.node_parser import SentenceSplitter
@@ -8,16 +7,18 @@ from sentence_transformers import SentenceTransformer
 from .config import config
 
 
-def create_collection(client: QdrantClient) -> None:
+def create_collection(qdrant_client: QdrantClient) -> None:
     """Creates the Qdrant collection if it doesn't exist"""
-    if client.collection_exists(collection_name=config.COLLECTION_NAME):
+    if qdrant_client.collection_exists(collection_name=config.COLLECTION_NAME):
         return
     else:
-        client.create_collection(
+        qdrant_client.create_collection(
             collection_name=config.COLLECTION_NAME,
-            vectors_config=models.VectorParams(
-                size=config.VECTOR_SIZE, distance=models.Distance.COSINE
-            ),
+            vectors_config={
+                "dense": models.VectorParams(
+                    size=config.VECTOR_SIZE, distance=models.Distance.COSINE
+                )
+            },
             hnsw_config=models.HnswConfigDiff(
                 m=config.HNSW_M, ef_construct=config.HNSW_EF_CONSTRUCT
             ),
@@ -68,7 +69,9 @@ def embed(chunks: list[str], book_name: str) -> list[models.PointStruct]:
         points.append(
             models.PointStruct(
                 id=i,
-                vector=embedding,
+                vector={
+                    "dense": embedding,
+                },
                 payload={
                     "text": chunk,
                     "index": i,
@@ -80,13 +83,20 @@ def embed(chunks: list[str], book_name: str) -> list[models.PointStruct]:
     return points
 
 
-async def main() -> None:
-    """Main function - indexes all books defined in BOOKS list"""
-    client = QdrantClient(path="./qdrant_data")
+def upsert_points(
+    qdrant_client: QdrantClient, points: list[models.PointStruct]
+) -> None:
+    """Upserts points to qdrant"""
+    qdrant_client.upsert(collection_name=config.COLLECTION_NAME, points=points)
+
+
+def main() -> None:
+    """Orchestrates the functionalities"""
+    qdrant_client = QdrantClient(path="./qdrant_data")
     print("Connected to Qdrant")
 
     try:
-        create_collection(client)
+        create_collection(qdrant_client)
 
         for book in config.BOOKS:
             print(f"\n{'=' * 50}")
@@ -104,15 +114,14 @@ async def main() -> None:
             print(f"Created {len(chunks)} chunks")
 
             points = embed(chunks, book)
-
-            client.upsert(collection_name=config.COLLECTION_NAME, points=points)
+            upsert_points(qdrant_client, points)
             print(f"Successfully indexed {len(points)} chunks from {book}!")
 
     except Exception:
         raise
     finally:
-        client.close()
+        qdrant_client.close()
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

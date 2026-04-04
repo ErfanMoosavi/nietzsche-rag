@@ -25,6 +25,7 @@ class Engine:
 
         results = qdrant_client.query_points(
             collection_name=settings.collection_name,
+            using="dense",
             query=embedding,
             limit=limit,
             query_filter=query_filter,
