@@ -122,45 +122,39 @@ def setup() -> None:
     qdrant_client = get_qdrant()
     print("Connected to Qdrant")
 
-    try:
-        # Ensure collection and index exist (idempotent)
-        _create_collection(qdrant_client)
-        _create_payload_index(qdrant_client)
+    # Ensure collection and index exist (idempotent)
+    _create_collection(qdrant_client)
+    _create_payload_index(qdrant_client)
 
-        # Check if data already exists
-        if _is_collection_populated(qdrant_client):
-            print("Collection already contains points. Skipping indexing.")
+    # Check if data already exists
+    if _is_collection_populated(qdrant_client):
+        print("Collection already contains points. Skipping indexing.")
+    else:
+        print("Collection empty. Starting indexing...")
+
+        # Save model only if missing
+        if not _is_model_present():
+            _save_model()
         else:
-            print("Collection empty. Starting indexing...")
+            print("Model already saved locally. Skipping download.")
 
-            # Save model only if missing
-            if not _is_model_present():
-                _save_model()
-            else:
-                print("Model already saved locally. Skipping download.")
+        # Load model
+        model = SentenceTransformer("all-MiniLM-L6-v2", local_files_only=True)
 
-            # Load model
-            model = SentenceTransformer("all-MiniLM-L6-v2", local_files_only=True)
+        # Process each book
+        for book in setup_config.BOOKS:
+            print(f"Processing: {book}")
 
-            # Process each book
-            for book in setup_config.BOOKS:
-                print(f"Processing: {book}")
+            book_file = book + ".txt"
+            data_path = Path(__file__).parent / "data" / book_file
 
-                book_file = book + ".txt"
-                data_path = Path(__file__).parent / "data" / book_file
+            text = _read_book(data_path)
+            print(f"Read {len(text)} characters")
 
-                text = _read_book(data_path)
-                print(f"Read {len(text)} characters")
+            preprocessed_text = _preprocess(text)
+            chunks = _chunk(preprocessed_text)
+            print(f"Created {len(chunks)} chunks")
 
-                preprocessed_text = _preprocess(text)
-                chunks = _chunk(preprocessed_text)
-                print(f"Created {len(chunks)} chunks")
-
-                points = _embed(model, chunks, book)
-                _upsert_points(qdrant_client, points)
-                print(f"Successfully indexed {len(points)} chunks from {book}!")
-
-    except Exception:
-        raise
-    finally:
-        qdrant_client.close()
+            points = _embed(model, chunks, book)
+            _upsert_points(qdrant_client, points)
+            print(f"Successfully indexed {len(points)} chunks from {book}!")
