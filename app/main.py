@@ -4,13 +4,13 @@ from fastapi import FastAPI
 
 from app.config import settings
 from app.routes import books_router, rag_router
-from app.setup import Setup
+from app.setup import setup
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
-    Setup.setup()
+    setup()
 
     yield
 
@@ -23,6 +23,7 @@ app = FastAPI(
     description=settings.description,
     contact=settings.contact,
     license_info=settings.license_info,
+    lifespan=lifespan,
 )
 
 
