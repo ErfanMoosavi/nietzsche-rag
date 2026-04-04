@@ -15,7 +15,7 @@ class Setup:
         ):
             self.is_setup = True
 
-    def create_collection(self, qdrant_client: QdrantClient) -> None:
+    def _create_collection(self, qdrant_client: QdrantClient) -> None:
         """Creates the Qdrant collection if it doesn't exist"""
         if qdrant_client.collection_exists(
             collection_name=setup_config.COLLECTION_NAME
@@ -34,38 +34,38 @@ class Setup:
                 ),
             )
 
-    def create_payload_index(self, qdrant_client: QdrantClient) -> None:
+    def _create_payload_index(self, qdrant_client: QdrantClient) -> None:
         """Indexed the payload for more efficient search"""
         qdrant_client.create_payload_index(
             collection_name=setup_config.COLLECTION_NAME, field_name="book"
         )
 
-    def read_book(self, book_path: Path) -> str:
+    def _read_book(self, book_path: Path) -> str:
         """Reads a book file and returns the text as a string"""
         with open(book_path, "r", encoding="utf-8") as f:
             text = f.read()
         return text
 
-    def preprocess(self, text: str) -> str:
+    def _preprocess(self, text: str) -> str:
         """Preprocesses the text before embedding"""
         text = text.replace("\n", " ")
         text = text.replace("\r", " ")
         text = " ".join(text.split())
         return text
 
-    def chunk(self, text: str) -> list[str]:
+    def _chunk(self, text: str) -> list[str]:
         """Chunk the text using sentence chunking method"""
         splitter = SentenceSplitter(
             chunk_size=setup_config.CHUNK_SIZE, chunk_overlap=setup_config.CHUNK_OVERLAP
         )
         return splitter.split_text(text=text)
 
-    def save_model(self) -> None:
+    def _save_model(self) -> None:
         """Saves the embedding model for offline usage"""
         model = SentenceTransformer("all-MiniLM-L6-v2")
         model.save_pretrained("all-MiniLM-L6-v2-local")
 
-    def embed(
+    def _embed(
         self, model: SentenceTransformer, chunks: list[str], book_name: str
     ) -> list[models.PointStruct]:
         """Embeds the chunks and returns Qdrant PointStructs with book metadata"""
@@ -100,7 +100,7 @@ class Setup:
             )
         return points
 
-    def upsert_points(
+    def _upsert_points(
         self, qdrant_client: QdrantClient, points: list[models.PointStruct]
     ) -> None:
         """Upserts points to qdrant"""
@@ -117,13 +117,13 @@ class Setup:
 
             try:
                 # Create collection
-                self.create_collection(qdrant_client)
+                self._create_collection(qdrant_client)
 
                 # Create payload index
-                self.create_payload_index(qdrant_client)
+                self._create_payload_index(qdrant_client)
 
                 # Save the model
-                self.save_model()
+                self._save_model()
 
                 # Load the model
                 model = SentenceTransformer("all-MiniLM-L6-v2", local_files_only=True)
@@ -135,21 +135,21 @@ class Setup:
                     data_path = Path(__file__).parent / "data" / book_file
 
                     # Read the book
-                    text = self.read_book(data_path)
+                    text = self._read_book(data_path)
                     print(f"Read {len(text)} characters")
 
                     # Preprocess the book
-                    preprocessed_text = self.preprocess(text)
+                    preprocessed_text = self._preprocess(text)
 
                     # Chunk
-                    chunks = self.chunk(preprocessed_text)
+                    chunks = self._chunk(preprocessed_text)
                     print(f"Created {len(chunks)} chunks")
 
                     # Embed
-                    points = self.embed(model, chunks, book)
+                    points = self._embed(model, chunks, book)
 
                     # Upsert points
-                    self.upsert_points(qdrant_client, points)
+                    self._upsert_points(qdrant_client, points)
                     print(f"Successfully indexed {len(points)} chunks from {book}!")
 
             except Exception:
