@@ -1,7 +1,19 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 
 from app.config import settings
 from app.routes import books_router, rag_router
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+
+    yield
+
+    # Shutdown
+
 
 app = FastAPI(
     title=settings.title,
