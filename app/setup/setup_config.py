@@ -1,4 +1,4 @@
-class Config:
+class SetupConfig:
     COLLECTION_NAME = "nietzsche_rag"
 
     BOOKS = [
@@ -20,4 +20,4 @@ class Config:
     CHUNK_OVERLAP = 35
 
 
-config = Config()
+setup_config = SetupConfig()
