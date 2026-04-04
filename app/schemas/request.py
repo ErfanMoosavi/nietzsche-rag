@@ -16,7 +16,7 @@ BookName = Literal[
 class RetrieveReq(BaseModel):
     text: str = Field(..., example="Punishment", description="The input text")
     limit: int = Field(
-        default=5, gt=0, lt=20, description="Number of results to return"
+        default=5, gt=0, lte=20, description="Number of results to return"
     )
     book: list[BookName] = Field(
         default=[], description="List of books to search. Empty list means all books."
@@ -30,7 +30,7 @@ class RagReq(BaseModel):
     retrieval_limit: int = Field(
         default=3,
         gt=0,
-        lt=20,
+        lte=20,
         description="Number of results to return for RAG pipeline",
     )
     based_on: list[BookName] = Field(
