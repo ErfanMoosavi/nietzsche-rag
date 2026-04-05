@@ -73,8 +73,8 @@ class Settings(BaseSettings):
     qdrant_path: str = str(project_root / "qdrant_data")
     collection_name: str = "nietzsche_rag"
     vector_size: int = 384
-    hnsw_m: int = 16
-    hnsw_ef_construct: int = 100
+    hnsw_m: int = 32
+    hnsw_ef_construct: int = 200
     chunk_size: int = 160
     chunk_overlap: int = 35
 
