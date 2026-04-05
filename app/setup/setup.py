@@ -8,18 +8,6 @@ from app.config import settings
 from app.dependencies import get_qdrant
 
 
-def _is_model_present() -> bool:
-    return (settings.project_root / "models" / "all-MiniLM-L6-v2-local").exists()
-
-
-def _is_collection_populated(qdrant_client: QdrantClient) -> bool:
-    try:
-        count = qdrant_client.count(collection_name=settings.collection_name)
-        return count.count > 0
-    except Exception:
-        return False
-
-
 def _create_collection(qdrant_client: QdrantClient) -> None:
     if qdrant_client.collection_exists(collection_name=settings.collection_name):
         return
@@ -41,6 +29,18 @@ def _create_payload_index(qdrant_client: QdrantClient) -> None:
     qdrant_client.create_payload_index(
         collection_name=settings.collection_name, field_name="book"
     )
+
+
+def _is_collection_populated(qdrant_client: QdrantClient) -> bool:
+    try:
+        count = qdrant_client.count(collection_name=settings.collection_name)
+        return count.count > 0
+    except Exception:
+        return False
+
+
+def _is_model_present() -> bool:
+    return (settings.project_root / "models" / "all-MiniLM-L6-v2-local").exists()
 
 
 def _read_book(book_path: Path) -> str:
