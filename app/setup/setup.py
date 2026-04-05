@@ -10,7 +10,7 @@ from app.setup.setup_config import setup_config
 
 
 def _is_model_present() -> bool:
-    return (Path(__file__).parent / "all-MiniLM-L6-v2-local").exists()
+    return (settings.project_root / "models" / "all-MiniLM-L6-v2-local").exists()
 
 
 def _is_collection_populated(qdrant_client: QdrantClient) -> bool:
@@ -72,7 +72,9 @@ def _chunk(text: str) -> list[str]:
 def _save_model() -> None:
     """Saves the embedding model for offline usage"""
     model = SentenceTransformer("all-MiniLM-L6-v2")
-    model.save_pretrained("all-MiniLM-L6-v2-local")
+    model.save_pretrained(
+        str(settings.project_root / "models" / "all-MiniLM-L6-v2-local")
+    )
 
 
 def _embed(
@@ -150,7 +152,7 @@ def setup() -> None:
             print(f"Processing: {book}")
 
             book_file = book + ".txt"
-            data_path = Path(__file__).parent / "data" / book_file
+            data_path = settings.project_root / "data" / book_file
 
             text = _read_book(data_path)
             print(f"Read {len(text)} characters")

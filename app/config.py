@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Any
 
 from pydantic_settings import BaseSettings
@@ -66,7 +67,8 @@ class Settings(BaseSettings):
     llm_model: str
 
     # Qdrant settings
-    qdrant_path: str = "./qdrant_data"
+    project_root = Path(__file__).parent.parent
+    qdrant_path: str = str(project_root / "qdrant_data")
     collection_name: str = "nietzsche_rag"
 
     class Config:
