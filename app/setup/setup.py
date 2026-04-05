@@ -33,8 +33,7 @@ def _create_payload_index(qdrant_client: QdrantClient) -> None:
 
 def _is_collection_populated(qdrant_client: QdrantClient) -> bool:
     try:
-        count = qdrant_client.count(collection_name=settings.collection_name)
-        return count.count > 0
+        return qdrant_client.count(collection_name=settings.collection_name).count > 0
     except Exception:
         return False
 
@@ -44,16 +43,11 @@ def _is_model_present() -> bool:
 
 
 def _read_book(book_path: Path) -> str:
-    with open(book_path, "r", encoding="utf-8") as f:
-        text = f.read()
-    return text
+    return book_path.read_text(encoding="utf-8")
 
 
 def _preprocess(text: str) -> str:
-    text = text.replace("\n", " ")
-    text = text.replace("\r", " ")
-    text = " ".join(text.split())
-    return text
+    return " ".join(text.replace("\n", " ").replace("\r", " ").split())
 
 
 def _chunk(text: str) -> list[str]:
@@ -70,32 +64,18 @@ def _save_model() -> None:
     )
 
 
-def _embed(
+def _embed_batch(
     model: SentenceTransformer, chunks: list[str], book_name: str, start_id: int
 ) -> tuple[list[models.PointStruct], int]:
-    print("Loading embedding model...")
+    print(f"Embedding {len(chunks)} chunks for {book_name}...")
+    embeddings = model.encode(chunks, show_progress_bar=True)
 
     points = []
-    total_chunks = len(chunks)
-
-    for i, chunk in enumerate(chunks):
-        point_id = start_id + i
-
-        if i == 0:
-            print(f"Embedding chunk 0/{total_chunks} for {book_name}")
-        elif i % 50 == 0 or i == total_chunks - 1:
-            print(
-                f"Embedding chunk {i}/{total_chunks} for {book_name} ({i / total_chunks * 100:.1f}%)"
-            )
-
-        embedding = model.encode(chunk).tolist()
-
+    for i, (chunk, emb) in enumerate(zip(chunks, embeddings)):
         points.append(
             models.PointStruct(
-                id=point_id,
-                vector={
-                    "dense": embedding,
-                },
+                id=start_id + i,
+                vector={"dense": emb.tolist()},
                 payload={
                     "text": chunk,
                     "index": i,
@@ -152,6 +132,6 @@ def setup() -> None:
             chunks = _chunk(preprocessed_text)
             print(f"Created {len(chunks)} chunks")
 
-            points, next_id = _embed(model, chunks, book, next_id)
+            points, next_id = _embed_batch(model, chunks, book, next_id)
             _upsert_points(qdrant_client, points)
             print(f"Successfully indexed {len(points)} chunks from {book}!")
