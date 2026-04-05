@@ -120,7 +120,7 @@ def setup() -> None:
         # Process each book
         next_id = 0
         for book in settings.books.keys():
-            print(f"Processing: {book}")
+            print(f"Processing: {book}...")
 
             book_file = book + ".txt"
             data_path = settings.project_root / "data" / book_file
@@ -133,5 +133,7 @@ def setup() -> None:
             print(f"Created {len(chunks)} chunks")
 
             points, next_id = _embed_batch(model, chunks, book, next_id)
+
+            print("Indexing points...")
             _upsert_points(qdrant_client, points)
             print(f"Successfully indexed {len(points)} chunks from {book}!")
