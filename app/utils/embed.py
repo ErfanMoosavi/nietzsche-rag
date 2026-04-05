@@ -1,6 +1,7 @@
-from app.dependencies import get_embedding_model
+from sentence_transformers import SentenceTransformer
+
+_model = SentenceTransformer("all-MiniLM-L6-v2", local_files_only=True)
 
 
 def embed(text: str) -> list[float]:
-    model = get_embedding_model()
-    return model.encode(text).tolist()
+    return _model.encode(text).tolist()
