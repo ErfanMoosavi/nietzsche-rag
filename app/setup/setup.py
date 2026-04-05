@@ -5,7 +5,7 @@ from qdrant_client import QdrantClient, models
 from sentence_transformers import SentenceTransformer
 
 from app.config import settings
-from app.dependencies import get_qdrant
+from app.dependencies import get_embedding_model, get_qdrant
 
 
 def _create_collection(qdrant_client: QdrantClient) -> None:
@@ -65,9 +65,10 @@ def _save_model() -> None:
 
 
 def _embed_batch(
-    model: SentenceTransformer, chunks: list[str], book_name: str, start_id: int
+    chunks: list[str], book_name: str, start_id: int
 ) -> tuple[list[models.PointStruct], int]:
     print(f"Embedding {len(chunks)} chunks for {book_name}...")
+    model = get_embedding_model()
     embeddings = model.encode(chunks, show_progress_bar=True)
 
     points = []
@@ -114,9 +115,6 @@ def setup() -> None:
         else:
             print("Model already saved locally. Skipping download.")
 
-        # Load model
-        model = SentenceTransformer("all-MiniLM-L6-v2", local_files_only=True)
-
         # Process each book
         next_id = 0
         for book in settings.books.keys():
@@ -132,6 +130,6 @@ def setup() -> None:
             chunks = _chunk(preprocessed_text)
             print(f"Created {len(chunks)} chunks")
 
-            points, next_id = _embed_batch(model, chunks, book, next_id)
+            points, next_id = _embed_batch(chunks, book, next_id)
             _upsert_points(qdrant_client, points)
             print(f"Successfully indexed {len(points)} chunks from {book}!")
