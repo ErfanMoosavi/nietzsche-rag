@@ -67,7 +67,7 @@ class Settings(BaseSettings):
     llm_model: str
 
     # Qdrant settings
-    project_root = Path(__file__).parent.parent
+    project_root: Path = Path(__file__).parent.parent
     qdrant_path: str = str(project_root / "qdrant_data")
     collection_name: str = "nietzsche_rag"
 
