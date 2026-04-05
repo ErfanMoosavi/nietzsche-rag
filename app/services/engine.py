@@ -29,6 +29,7 @@ class Engine:
             query=embedding,
             limit=limit,
             query_filter=query_filter,
+            search_params=models.SearchParams(hnsw_ef=settings.hnsw_ef),
             with_payload=True,
         )
 

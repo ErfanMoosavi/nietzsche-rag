@@ -75,6 +75,7 @@ class Settings(BaseSettings):
     vector_size: int = 384
     hnsw_m: int = 32
     hnsw_ef_construct: int = 200
+    hnsw_ef: int = 128
     chunk_size: int = 160
     chunk_overlap: int = 35
 
