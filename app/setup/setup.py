@@ -6,7 +6,6 @@ from sentence_transformers import SentenceTransformer
 
 from app.config import settings
 from app.dependencies import get_qdrant
-from app.setup.setup_config import setup_config
 
 
 def _is_model_present() -> bool:
@@ -15,46 +14,42 @@ def _is_model_present() -> bool:
 
 def _is_collection_populated(qdrant_client: QdrantClient) -> bool:
     try:
-        count = qdrant_client.count(collection_name=setup_config.collection_name)
+        count = qdrant_client.count(collection_name=settings.collection_name)
         return count.count > 0
     except Exception:
         return False
 
 
 def _create_collection(qdrant_client: QdrantClient) -> None:
-    """Creates the Qdrant collection if it doesn't exist"""
-    if qdrant_client.collection_exists(collection_name=setup_config.collection_name):
+    if qdrant_client.collection_exists(collection_name=settings.collection_name):
         return
     else:
         qdrant_client.create_collection(
-            collection_name=setup_config.collection_name,
+            collection_name=settings.collection_name,
             vectors_config={
                 "dense": models.VectorParams(
-                    size=setup_config.vector_size, distance=models.Distance.COSINE
+                    size=settings.vector_size, distance=models.Distance.COSINE
                 )
             },
             hnsw_config=models.HnswConfigDiff(
-                m=setup_config.hnsw_m, ef_construct=setup_config.hnsw_ef_construct
+                m=settings.hnsw_m, ef_construct=settings.hnsw_ef_construct
             ),
         )
 
 
 def _create_payload_index(qdrant_client: QdrantClient) -> None:
-    """Indexed the payload for more efficient search"""
     qdrant_client.create_payload_index(
-        collection_name=setup_config.collection_name, field_name="book"
+        collection_name=settings.collection_name, field_name="book"
     )
 
 
 def _read_book(book_path: Path) -> str:
-    """Reads a book file and returns the text as a string"""
     with open(book_path, "r", encoding="utf-8") as f:
         text = f.read()
     return text
 
 
 def _preprocess(text: str) -> str:
-    """Preprocesses the text before embedding"""
     text = text.replace("\n", " ")
     text = text.replace("\r", " ")
     text = " ".join(text.split())
@@ -62,15 +57,13 @@ def _preprocess(text: str) -> str:
 
 
 def _chunk(text: str) -> list[str]:
-    """Chunk the text using sentence chunking method"""
     splitter = SentenceSplitter(
-        chunk_size=setup_config.chunk_size, chunk_overlap=setup_config.chunk_overlap
+        chunk_size=settings.chunk_size, chunk_overlap=settings.chunk_overlap
     )
     return splitter.split_text(text=text)
 
 
 def _save_model() -> None:
-    """Saves the embedding model for offline usage"""
     model = SentenceTransformer("all-MiniLM-L6-v2")
     model.save_pretrained(
         str(settings.project_root / "models" / "all-MiniLM-L6-v2-local")
@@ -80,7 +73,6 @@ def _save_model() -> None:
 def _embed(
     model: SentenceTransformer, chunks: list[str], book_name: str, start_id: int
 ) -> tuple[list[models.PointStruct], int]:
-    """Embeds the chunks and returns Qdrant PointStructs with book metadata"""
     print("Loading embedding model...")
 
     points = []
@@ -118,8 +110,7 @@ def _embed(
 def _upsert_points(
     qdrant_client: QdrantClient, points: list[models.PointStruct]
 ) -> None:
-    """Upserts points to qdrant"""
-    qdrant_client.upsert(collection_name=setup_config.collection_name, points=points)
+    qdrant_client.upsert(collection_name=settings.collection_name, points=points)
 
 
 def setup() -> None:

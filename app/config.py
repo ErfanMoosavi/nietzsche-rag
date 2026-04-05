@@ -15,6 +15,9 @@ class Settings(BaseSettings):
     }
     license_info: dict[str, str] = {"name": "MIT"}
 
+    # Project root
+    project_root: Path = Path(__file__).parent.parent
+
     # Books
     books: dict[str, dict[str, Any]] = {
         "thus_spoke_zarathustra": {
@@ -67,9 +70,13 @@ class Settings(BaseSettings):
     llm_model: str
 
     # Qdrant settings
-    project_root: Path = Path(__file__).parent.parent
     qdrant_path: str = str(project_root / "qdrant_data")
     collection_name: str = "nietzsche_rag"
+    vector_size: int = 384
+    hnsw_m: int = 32
+    hnsw_ef_construct: int = 200
+    chunk_size: int = 160
+    chunk_overlap: int = 35
 
     class Config:
         env_file = ".env"
