@@ -7,7 +7,7 @@ from app.config import settings
 
 @lru_cache(maxsize=1)
 def get_embedding_model() -> SentenceTransformer:
-    return SentenceTransformer(settings.embedding_model, local_files_only=True)
+    return SentenceTransformer(settings.embedding_model)
 
 
 def embed(text: str) -> list[float]:

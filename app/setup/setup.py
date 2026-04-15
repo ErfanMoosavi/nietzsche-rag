@@ -38,16 +38,6 @@ def _is_collection_populated(qdrant_client: QdrantClient) -> bool:
         return False
 
 
-def _ensure_model_cached() -> None:
-    from sentence_transformers import SentenceTransformer
-    from app.utils.embed import get_embedding_model
-
-    try:
-        get_embedding_model()
-    except Exception:
-        SentenceTransformer(settings.embedding_model)
-
-
 def _read_book(book_path: Path) -> str:
     return book_path.read_text(encoding="utf-8")
 
@@ -100,7 +90,6 @@ def setup() -> None:
     # Ensure collection and index exist (idempotent)
     _create_collection(qdrant_client)
     _create_payload_index(qdrant_client)
-    _ensure_model_cached()
 
     # Check if data already exists
     if _is_collection_populated(qdrant_client):
