@@ -72,7 +72,8 @@ class Settings(BaseSettings):
     # Qdrant settings
     qdrant_path: str = str(project_root / "qdrant_data")
     collection_name: str = "nietzsche_rag"
-    vector_size: int = 384
+    embedding_model: str = "BAAI/bge-large-en-v1.5"
+    vector_size: int = 1024
     hnsw_m: int = 32
     hnsw_ef_construct: int = 200
     hnsw_ef: int = 128

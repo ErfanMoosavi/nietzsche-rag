@@ -2,10 +2,10 @@ from pathlib import Path
 
 from llama_index.core.node_parser import SentenceSplitter
 from qdrant_client import QdrantClient, models
-from sentence_transformers import SentenceTransformer
 
 from app.config import settings
 from app.dependencies import get_qdrant
+from app.utils.embed import get_embedding_model
 
 
 def _create_collection(qdrant_client: QdrantClient) -> None:
@@ -38,8 +38,14 @@ def _is_collection_populated(qdrant_client: QdrantClient) -> bool:
         return False
 
 
-def _is_model_present() -> bool:
-    return (settings.project_root / "models" / "all-MiniLM-L6-v2-local").exists()
+def _ensure_model_cached() -> None:
+    from sentence_transformers import SentenceTransformer
+    from app.utils.embed import get_embedding_model
+
+    try:
+        get_embedding_model()
+    except Exception:
+        SentenceTransformer(settings.embedding_model)
 
 
 def _read_book(book_path: Path) -> str:
@@ -57,18 +63,11 @@ def _chunk(text: str) -> list[str]:
     return splitter.split_text(text=text)
 
 
-def _save_model() -> None:
-    model = SentenceTransformer("all-MiniLM-L6-v2")
-    model.save_pretrained(
-        str(settings.project_root / "models" / "all-MiniLM-L6-v2-local")
-    )
-
-
 def _embed_batch(
-    model: SentenceTransformer, chunks: list[str], book_name: str, start_id: int
+    chunks: list[str], book_name: str, start_id: int
 ) -> tuple[list[models.PointStruct], int]:
     print(f"Embedding {len(chunks)} chunks for {book_name}...")
-    embeddings = model.encode(chunks, show_progress_bar=True)
+    embeddings = get_embedding_model().encode(chunks, show_progress_bar=True)
 
     points = []
     for i, (chunk, emb) in enumerate(zip(chunks, embeddings)):
@@ -101,21 +100,13 @@ def setup() -> None:
     # Ensure collection and index exist (idempotent)
     _create_collection(qdrant_client)
     _create_payload_index(qdrant_client)
+    _ensure_model_cached()
 
     # Check if data already exists
     if _is_collection_populated(qdrant_client):
         print("Collection already contains points. Skipping indexing.")
     else:
         print("Collection empty. Starting indexing...")
-
-        # Save model only if missing
-        if not _is_model_present():
-            _save_model()
-        else:
-            print("Model already saved locally. Skipping download.")
-
-        # Load the model
-        model = SentenceTransformer("all-MiniLM-L6-v2", local_files_only=True)
 
         # Process each book
         next_id = 0
@@ -132,7 +123,7 @@ def setup() -> None:
             chunks = _chunk(preprocessed_text)
             print(f"Created {len(chunks)} chunks")
 
-            points, next_id = _embed_batch(model, chunks, book, next_id)
+            points, next_id = _embed_batch(chunks, book, next_id)
 
             print("Indexing points...")
             _upsert_points(qdrant_client, points)
