@@ -70,7 +70,8 @@ class Settings(BaseSettings):
     llm_model: str
 
     # Qdrant settings
-    qdrant_path: str = str(project_root / "qdrant_data")
+    qdrant_host: str = "localhost"
+    qdrant_port: int = 6333
     collection_name: str = "nietzsche_rag"
     embedding_model: str = "BAAI/bge-large-en-v1.5"
     vector_size: int = 1024

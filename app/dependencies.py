@@ -4,7 +4,7 @@ from qdrant_client import QdrantClient
 from app.config import settings
 from app.services import Engine
 
-qdrant_client = QdrantClient(path=settings.qdrant_path)
+qdrant_client = QdrantClient(host=settings.qdrant_host, port=settings.qdrant_port)
 openai_client = OpenAI(base_url=settings.base_url, api_key=settings.openai_api_key)
 engine = Engine()
 
