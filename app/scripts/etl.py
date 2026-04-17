@@ -1,11 +1,18 @@
+import logging
 from pathlib import Path
-
-from llama_index.core.node_parser import SentenceSplitter
-from qdrant_client import QdrantClient, models
 
 from app.config import settings
 from app.dependencies import get_qdrant
 from app.utils.embed import get_embedding_model
+from llama_index.core.node_parser import SentenceSplitter
+from qdrant_client import QdrantClient, models
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 
 
 def _create_collection(qdrant_client: QdrantClient) -> None:
@@ -27,7 +34,9 @@ def _create_collection(qdrant_client: QdrantClient) -> None:
 
 def _create_payload_index(qdrant_client: QdrantClient) -> None:
     qdrant_client.create_payload_index(
-        collection_name=settings.collection_name, field_name="book"
+        collection_name=settings.collection_name,
+        field_name="book",
+        field_schema=models.PayloadSchemaType.KEYWORD,
     )
 
 
@@ -56,7 +65,7 @@ def _chunk(text: str) -> list[str]:
 def _embed_batch(
     chunks: list[str], book_name: str, start_id: int
 ) -> tuple[list[models.PointStruct], int]:
-    print(f"Embedding {len(chunks)} chunks for {book_name}...")
+    logger.info(f"Embedding {len(chunks)} chunks for {book_name}...")
     embeddings = get_embedding_model().encode(chunks, show_progress_bar=True)
 
     points = []
@@ -85,7 +94,7 @@ def _upsert_points(
 def setup() -> None:
     # Connect to Qdrant (local file mode)
     qdrant_client = get_qdrant()
-    print("Connected to Qdrant")
+    logger.info("Connected to Qdrant")
 
     # Ensure collection and index exist (idempotent)
     _create_collection(qdrant_client)
@@ -93,27 +102,31 @@ def setup() -> None:
 
     # Check if data already exists
     if _is_collection_populated(qdrant_client):
-        print("Collection already contains points. Skipping indexing.")
+        logger.info("Collection already contains points. Skipping indexing.")
     else:
-        print("Collection empty. Starting indexing...")
+        logger.info("Collection empty. Starting indexing...")
 
         # Process each book
         next_id = 0
         for book in settings.books.keys():
-            print(f"Processing: {book}...")
+            logger.info(f"Processing: {book}...")
 
             book_file = book + ".txt"
             data_path = settings.project_root / "data" / book_file
 
             text = _read_book(data_path)
-            print(f"Read {len(text)} characters")
+            logger.info(f"Read {len(text)} characters")
 
             preprocessed_text = _preprocess(text)
             chunks = _chunk(preprocessed_text)
-            print(f"Created {len(chunks)} chunks")
+            logger.info(f"Created {len(chunks)} chunks")
 
             points, next_id = _embed_batch(chunks, book, next_id)
 
-            print("Indexing points...")
+            logger.info("Indexing points...")
             _upsert_points(qdrant_client, points)
-            print(f"Successfully indexed {len(points)} chunks from {book}!")
+            logger.info(f"Successfully indexed {len(points)} chunks from {book}!")
+
+
+if __name__ == "__main__":
+    setup()

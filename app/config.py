@@ -18,6 +18,23 @@ class Settings(BaseSettings):
     # Project root
     project_root: Path = Path(__file__).parent.parent
 
+    # OpenAI settings
+    openai_api_key: str
+    base_url: str
+    llm_model: str
+
+    # Qdrant settings
+    qdrant_host: str = "localhost"
+    qdrant_port: int = 6333
+    collection_name: str = "nietzsche_rag"
+    embedding_model: str = "all-MiniLM-L6-v2"
+    vector_size: int = 384
+    hnsw_m: int = 32
+    hnsw_ef_construct: int = 200
+    hnsw_ef: int = 128
+    chunk_size: int = 160
+    chunk_overlap: int = 35
+
     # Books
     books: dict[str, dict[str, Any]] = {
         "thus_spoke_zarathustra": {
@@ -63,23 +80,6 @@ class Settings(BaseSettings):
             "summary": "An exploration of Greek tragedy through the Apollonian and Dionysian duality.",
         },
     }
-
-    # OpenAI settings
-    openai_api_key: str
-    base_url: str
-    llm_model: str
-
-    # Qdrant settings
-    qdrant_host: str = "localhost"
-    qdrant_port: int = 6333
-    collection_name: str = "nietzsche_rag"
-    embedding_model: str = "BAAI/bge-large-en-v1.5"
-    vector_size: int = 1024
-    hnsw_m: int = 32
-    hnsw_ef_construct: int = 200
-    hnsw_ef: int = 128
-    chunk_size: int = 160
-    chunk_overlap: int = 35
 
     class Config:
         env_file = ".env"
