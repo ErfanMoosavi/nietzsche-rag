@@ -17,25 +17,25 @@ services:
       timeout: 5s
       retries: 5
 
-  app:
-    build: .
-    container_name: nietzsche-rag-api
-    ports:
-      - "8000:8000"
-    environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - BASE_URL=${BASE_URL}
-      - LLM_MODEL=${LLM_MODEL}
-      - QDRANT_HOST=qdrant
-      - QDRANT_PORT=6333
-    volumes:
-      - ./data:/app/data
-    depends_on:
-      qdrant:
-        condition: service_healthy
-    networks:
-      - nietzsche-net
-    restart: unless-stopped
+  # app:
+  #   build: .
+  #   container_name: nietzsche-rag-api
+  #   ports:
+  #     - "8000:8000"
+  #   environment:
+  #     - OPENAI_API_KEY=${OPENAI_API_KEY}
+  #     - BASE_URL=${BASE_URL}
+  #     - LLM_MODEL=${LLM_MODEL}
+  #     - QDRANT_HOST=qdrant
+  #     - QDRANT_PORT=6333
+  #   volumes:
+  #     - ./data:/app/data
+  #     - ./models:/app/models
+  #   depends_on:
+  #     - qdrant
+  #   networks:
+  #     - nietzsche-net
+  #   restart: unless-stopped
 
 networks:
   nietzsche-net:
