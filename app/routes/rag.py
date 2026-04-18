@@ -33,14 +33,14 @@ def ask_question(
     engine: Engine = Depends(get_engine),
 ) -> RagRes:
     try:
-        response = engine.generate_response(
+        response, retrieved_points = engine.generate_response(
             openai_client,
             qdrant_client,
             req.question,
             limit=req.retrieval_limit,
             book=req.based_on,
         )
-        return RagRes(answer=response)
+        return RagRes(answer=response, retrieved_points=retrieved_points)
 
     except Exception as e:
         raise HTTPException(

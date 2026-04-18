@@ -1,16 +1,19 @@
+from functools import lru_cache
+
 from openai import OpenAI
 from qdrant_client import QdrantClient, models
+from sentence_transformers import SentenceTransformer
 
 from app.config import settings
 from app.schemas import Point
-from app.utils import embed, format_chat, format_points
+from app.utils import format_chat, format_points
 
 
 class Engine:
     def retrieve(
         self, qdrant_client: QdrantClient, query: str, limit: int, books: list[str]
     ) -> list[Point]:
-        embedding = embed(query)
+        embedding = self.embed(query)
         query_filter = None
 
         if books:
@@ -51,7 +54,7 @@ class Engine:
         question: str,
         limit: int,
         book: str | None,
-    ) -> str:
+    ) -> tuple[str, list[Point]]:
         retrieved_points = self.retrieve(qdrant_client, question, limit, book)
         formatted_points = format_points(retrieved_points)
         main_message = f"""
@@ -77,3 +80,13 @@ class Engine:
             model=settings.llm_model, messages=formatted_main_message
         )
         return response.choices[0].message.content
+
+    def embed(self, text: str) -> list[float]:
+        model = self._get_embedding_model()
+        embedding = model.encode(text, normalize_embeddings=True)
+        return embedding.tolist()
+
+    @lru_cache(maxsize=1)
+    def _get_embedding_model(self) -> SentenceTransformer:
+        model = SentenceTransformer(settings.embedding_model, local_files_only=True)
+        return model

@@ -1,15 +1,13 @@
-import os
-
-os.environ["NO_PROXY"] = "localhost,127.0.0.1"
-
 import logging
+import os
+from functools import lru_cache
 from pathlib import Path
 
 from app.config import settings
 from app.dependencies import get_qdrant
-from app.utils.embed import get_embedding_model
 from llama_index.core.node_parser import SentenceSplitter
 from qdrant_client import QdrantClient, models
+from sentence_transformers import SentenceTransformer
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
@@ -17,6 +15,7 @@ logging.basicConfig(
     format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
 )
+os.environ["NO_PROXY"] = "localhost,127.0.0.1"
 
 
 def _create_collection(qdrant_client: QdrantClient) -> None:
@@ -27,7 +26,7 @@ def _create_collection(qdrant_client: QdrantClient) -> None:
             collection_name=settings.collection_name,
             vectors_config={
                 "dense": models.VectorParams(
-                    size=get_embedding_model().get_embedding_dimension(),
+                    size=_get_embedding_model().get_embedding_dimension(),
                     distance=models.Distance.COSINE,
                 )
             },
@@ -67,11 +66,36 @@ def _chunk(text: str) -> list[str]:
     return splitter.split_text(text=text)
 
 
+def _download_model() -> None:
+    model_name = settings.embedding_model
+    local_model_dir = settings.project_root / "models" / model_name.replace("/", "_")
+
+    if local_model_dir.exists() and any(local_model_dir.iterdir()):
+        logger.info(f"Model already exists at {local_model_dir}")
+        return
+
+    logger.info(f"Model not found locally. Downloading '{model_name}'...")
+
+    model = SentenceTransformer(model_name)
+    local_model_dir.mkdir(parents=True, exist_ok=True)
+
+    model.save(str(local_model_dir))
+    logger.info(f"Model saved to {local_model_dir}")
+
+
+@lru_cache(maxsize=1)
+def _get_embedding_model(self) -> SentenceTransformer:
+    model = SentenceTransformer(settings.embedding_model, local_files_only=True)
+    return model
+
+
 def _embed_batch(
     chunks: list[str], book_name: str, start_id: int
 ) -> tuple[list[models.PointStruct], int]:
     logger.info(f"Embedding {len(chunks)} chunks for {book_name}...")
-    embeddings = get_embedding_model().encode(chunks, show_progress_bar=True)
+    embeddings = _get_embedding_model().encode(
+        chunks, show_progress_bar=True, batch_size=64
+    )
 
     points = []
     for i, (chunk, emb) in enumerate(zip(chunks, embeddings)):
@@ -112,6 +136,8 @@ def setup() -> None:
         logger.info("Collection already contains points. Skipping indexing.")
     else:
         logger.info("Collection empty. Starting indexing...")
+
+        _download_model()
 
         # Process each book
         next_id = 0

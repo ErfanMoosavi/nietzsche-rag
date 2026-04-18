@@ -16,6 +16,9 @@ class RetrieveRes(BaseModel):
 
 class RagRes(BaseModel):
     answer: str = Field(..., description="The answer of the question")
+    retrieved_points: list[Point] = Field(
+        ..., description="The retrieved points used for LLM generation"
+    )
 
 
 class BooksListRes(BaseModel):
