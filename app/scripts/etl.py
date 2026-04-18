@@ -1,3 +1,7 @@
+import os
+
+os.environ["NO_PROXY"] = "localhost,127.0.0.1"
+
 import logging
 from pathlib import Path
 
@@ -23,7 +27,8 @@ def _create_collection(qdrant_client: QdrantClient) -> None:
             collection_name=settings.collection_name,
             vectors_config={
                 "dense": models.VectorParams(
-                    size=settings.vector_size, distance=models.Distance.COSINE
+                    size=get_embedding_model().get_embedding_dimension(),
+                    distance=models.Distance.COSINE,
                 )
             },
             hnsw_config=models.HnswConfigDiff(
@@ -92,12 +97,14 @@ def _upsert_points(
 
 
 def setup() -> None:
-    # Connect to Qdrant (local file mode)
+    # Connect to Qdrant
     qdrant_client = get_qdrant()
     logger.info("Connected to Qdrant")
 
-    # Ensure collection and index exist (idempotent)
+    # Ensure collection and index exists
     _create_collection(qdrant_client)
+
+    # Create payload index
     _create_payload_index(qdrant_client)
 
     # Check if data already exists

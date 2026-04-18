@@ -27,8 +27,7 @@ class Settings(BaseSettings):
     qdrant_host: str = "localhost"
     qdrant_port: int = 6333
     collection_name: str = "nietzsche_rag"
-    embedding_model: str = "all-MiniLM-L6-v2"
-    vector_size: int = 384
+    embedding_model: str = "all-MiniLM-L12-v2"
     hnsw_m: int = 32
     hnsw_ef_construct: int = 200
     hnsw_ef: int = 128
@@ -85,6 +84,7 @@ class Settings(BaseSettings):
         env_file = ".env"
         env_file_encoding = "utf-8"
         case_sensitive = False
+        extra = "ignore"
 
 
 settings = Settings()
