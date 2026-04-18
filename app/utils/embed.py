@@ -7,7 +7,7 @@ from app.config import settings
 
 @lru_cache(maxsize=1)
 def get_embedding_model() -> SentenceTransformer:
-    model = SentenceTransformer(settings.embedding_model)
+    model = SentenceTransformer(settings.embedding_model, local_files_only=True)
     return model
 
 
