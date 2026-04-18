@@ -1,3 +1,4 @@
+import uvicorn
 from fastapi import FastAPI
 
 from app.config import settings
@@ -19,3 +20,6 @@ def home() -> dict[str, str]:
 
 app.include_router(books_router)
 app.include_router(rag_router)
+
+if __name__ == "__main__":
+    uvicorn.run(app="main:app", host="0.0.0.0", port=8000)
