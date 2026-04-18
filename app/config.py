@@ -25,7 +25,7 @@ class Settings(BaseSettings):
 
     # Qdrant settings
     qdrant_host: str = "localhost"
-    qdrant_port: int = 6333
+    qdrant_port: int = "6333"
     collection_name: str = "nietzsche_rag"
     embedding_model: str = "all-MiniLM-L6-v2"
     hnsw_m: int = 64
@@ -84,7 +84,6 @@ class Settings(BaseSettings):
         env_file = ".env"
         env_file_encoding = "utf-8"
         case_sensitive = False
-        extra = "ignore"
 
 
 settings = Settings()
