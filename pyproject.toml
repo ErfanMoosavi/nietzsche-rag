@@ -10,9 +10,4 @@ dependencies = [
     "openai>=2.30.0",
     "qdrant-client>=1.17.1",
     "sentence-transformers>=5.4.1",
-    "tqdm>=4.67.3",
 ]
-
-[build-system]
-requires = ["setuptools>=61.0", "wheel"]
-build-backend = "setuptools.build_meta"
