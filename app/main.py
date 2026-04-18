@@ -13,8 +13,13 @@ app = FastAPI(
 
 
 @app.get("/health", response_model=dict[str, str])
-def home() -> dict[str, str]:
+def health() -> dict[str, str]:
     return {"status": "Nietzsche says hello!"}
+
+
+@app.get("", response_model=dict[str, str])
+def home() -> dict[str, str]:
+    return {"message": "Welcome to Nietzsche's world!"}
 
 
 app.include_router(books_router)
