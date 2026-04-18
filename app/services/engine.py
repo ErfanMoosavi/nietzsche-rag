@@ -79,7 +79,7 @@ class Engine:
         response = openai_client.chat.completions.create(
             model=settings.llm_model, messages=formatted_main_message
         )
-        return response.choices[0].message.content
+        return response.choices[0].message.content, retrieved_points
 
     def embed(self, text: str) -> list[float]:
         model = self._get_embedding_model()
